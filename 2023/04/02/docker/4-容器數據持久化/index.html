@@ -17,18 +17,20 @@
   <meta name="keywords" content="AWS">
   
     <meta property="og:type" content="article">
-<meta property="og:title" content="Docker 概述">
-<meta property="og:url" content="http://example.com/2023/04/01/docker/1-Docker%20%E6%A6%82%E8%BF%B0%20/index.html">
+<meta property="og:title" content="Docker 容器數據持久化">
+<meta property="og:url" content="http://example.com/2023/04/02/docker/4-%E5%AE%B9%E5%99%A8%E6%95%B8%E6%93%9A%E6%8C%81%E4%B9%85%E5%8C%96/index.html">
 <meta property="og:site_name" content="Shaia">
 <meta property="og:locale" content="zh_TW">
-<meta property="article:published_time" content="2023-04-01T14:30:10.972Z">
-<meta property="article:modified_time" content="2023-04-01T14:34:59.362Z">
+<meta property="og:image" content="http://example.com/img/docker/4-%E5%AE%B9%E5%99%A8%E6%95%B8%E6%93%9A%E6%8C%81%E4%B9%85%E5%8C%96/Untitled.png">
+<meta property="article:published_time" content="2023-04-01T18:11:58.910Z">
+<meta property="article:modified_time" content="2023-04-01T18:27:14.215Z">
 <meta property="article:tag" content="Docker">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://example.com/img/docker/4-%E5%AE%B9%E5%99%A8%E6%95%B8%E6%93%9A%E6%8C%81%E4%B9%85%E5%8C%96/Untitled.png">
   
   
   
-  <title>Docker 概述 - Shaia</title>
+  <title>Docker 容器數據持久化 - Shaia</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -197,7 +199,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="Docker 概述"></span>
+            <span id="subtitle" data-typed-text="Docker 容器數據持久化"></span>
           
         </div>
 
@@ -208,8 +210,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2023-04-01 22:30" pubdate>
-          2023年4月1日
+        <time datetime="2023-04-02 02:11" pubdate>
+          2023年4月2日
         </time>
       </span>
     
@@ -224,7 +226,7 @@
         
         
         
-          5 分鐘
+          8 分鐘
         
       </span>
     
@@ -262,51 +264,51 @@
         <div id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">Docker 概述</h1>
+            <h1 style="display: none">Docker 容器數據持久化</h1>
             
             
               <div class="markdown-body">
                 
                 <hr>
 <span id="more"></span>
-<h1 id="Why"><a href="#Why" class="headerlink" title="Why?"></a>Why?</h1><ul>
-<li><p>上線流程繁瑣</p>
-<p>  開發 → 測試 → 申請資源 → 審批 → 部署 → 測試…等環節</p>
-</li>
-<li><p>資源利用率低</p>
-<p>  普遍服務器利用率低,造成過多浪費</p>
-</li>
-<li><p>擴容&#x2F;縮容不及時</p>
-<p>  業務高峰期擴容流程繁瑣,上線不及時</p>
-</li>
-<li><p>服務氣環境臃腫</p>
-<p>  服務器臃腫,對後期維護、遷移造成諸多不便</p>
-</li>
-<li><p>環境不一致</p>
+
+<h3 id="當容器刪除時-容器內的數據也會被刪除-如果需要保留數據的話就需要將數據掛載到本地。"><a href="#當容器刪除時-容器內的數據也會被刪除-如果需要保留數據的話就需要將數據掛載到本地。" class="headerlink" title="當容器刪除時,容器內的數據也會被刪除,如果需要保留數據的話就需要將數據掛載到本地。"></a>當容器刪除時,容器內的數據也會被刪除,如果需要保留數據的話就需要將數據掛載到本地。</h3><h2 id="Docker提供以下三種方式將數據從宿主機掛載到容器中"><a href="#Docker提供以下三種方式將數據從宿主機掛載到容器中" class="headerlink" title="Docker提供以下三種方式將數據從宿主機掛載到容器中:"></a>Docker提供以下三種方式將數據從宿主機掛載到容器中:</h2><p><img src="/img/docker/4-%E5%AE%B9%E5%99%A8%E6%95%B8%E6%93%9A%E6%8C%81%E4%B9%85%E5%8C%96/Untitled.png" srcset="/img/loading.gif" lazyload alt="Untitled"></p>
+<ul>
+<li><strong>volume</strong> : Docker管理宿主機文件系統的一部分( &#x2F;var&#x2F;lib&#x2F;docker&#x2F;volumes)。<ul>
+<li>應用場景：<ul>
+<li>多個運行容器間共享數據</li>
+<li>當Docker主機不確保具有給定的目錄或文件時。卷可以將容器運行時與Docker主機的配置解耦合</li>
+<li>備份、恢復、或將數據從一個Docker主機遷移到另一個Docker主機時</li>
+</ul>
 </li>
 </ul>
-<hr>
-<h1 id="What"><a href="#What" class="headerlink" title="What?"></a>What?</h1><ul>
-<li>操作系統級的虛擬化技術</li>
-<li>依賴linux特性: Namespace(資源隔離), Cgroups(資源限制)</li>
-<li>簡單的應用程式打包工具</li>
+</li>
 </ul>
-<hr>
-<h1 id="容器VS虛擬化"><a href="#容器VS虛擬化" class="headerlink" title="容器VS虛擬化"></a>容器VS虛擬化</h1><h3 id="容器"><a href="#容器" class="headerlink" title="容器"></a>容器</h3><ol>
-<li>容器提供一個獨立的環境,實踐環境隔離、資源限制</li>
-<li>主要解決應用層問題,便於快速部署、高效管理</li>
-</ol>
-<h3 id="虛擬化"><a href="#虛擬化" class="headerlink" title="虛擬化"></a>虛擬化</h3><ol>
-<li>提供服務器資源利用率</li>
-<li>完全隔離的環境</li>
-</ol>
-<h1 id="安裝Docker"><a href="#安裝Docker" class="headerlink" title="安裝Docker"></a>安裝Docker</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 添加Docker yum源</span><br>yum-config-manager \<br>--add-repo \<br>https://download.docker.com/linux/centos/docker-ce.repo<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment">#創建容器建立volume</span><br>docker volume create<br></code></pre></td></tr></table></figure>
 
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment">#安裝依賴包</span><br>yum install -y yum-utils<br></code></pre></td></tr></table></figure>
+<ul>
+<li><strong>bind mounts</strong> : 將宿主機上任意位置的文件或目錄引用到容器中，在使用綁定掛載時，這些目錄或文件不一定要存在，可掛載多個目錄。<ul>
+<li>應用場景：<ul>
+<li>主機與容器共享文件（Docker預設情況下通過這種方式為容器提供DNS解析，通過將&#x2F;etc&#x2F;resolv.conf掛載到容器中）</li>
+<li>共享源程式或build artifacts（比如將Maven的target&#x2F;目錄掛載到容器中，每次在Docker主機中build Maven時，容器能夠訪問到那些rebuilt artifacts）</li>
+<li>當docker主機中的文件或目錄結構和容器需要的一致時</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">docker run -d -it --name devtest --mount <span class="hljs-built_in">type</span>=<span class="hljs-built_in">bind</span>,<span class="hljs-built_in">source</span>=<span class="hljs-string">&quot;<span class="hljs-subst">$(pwd)</span>&quot;</span>/target,target=/app --mount <span class="hljs-built_in">type</span>=<span class="hljs-built_in">bind</span>,<span class="hljs-built_in">source</span>=<span class="hljs-string">&quot;<span class="hljs-subst">$(pwd)</span>&quot;</span>/target,target=/app2,<span class="hljs-built_in">readonly</span>,bind-propagation=rslave    nginx:latest<br></code></pre></td></tr></table></figure>
 
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment">#安裝DockerCE</span><br>yum install docker-ce docker-ce-cli containerd.io -y<br></code></pre></td></tr></table></figure>
+<ul>
+<li><strong>tmpfs</strong> : 掛載存儲在主機系統的內存中，而不會寫入主機的文件系統。如果不希望將數據持久存儲在任何位置，可以使用tmpfs，同時避免寫入容器可寫層提高性能<ul>
+<li>應用場景：<ul>
+<li>最好的使用場景是既不想將數據存於主機，又不想存於容器中時。這可以是出於安全的考慮，或當應用需要寫大量非持久性的狀態數據時為了保護容器的性能</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
 
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment">#啟動Docker服務並設置開機啟動</span><br>systemctl start docker<br>systemctl <span class="hljs-built_in">enable</span> docker<br></code></pre></td></tr></table></figure>
                 
               </div>
             
@@ -353,15 +355,21 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2023/04/01/docker/2-Docker%20%E9%8F%A1%E5%83%8F%E7%AE%A1%E7%90%86/" title="Docker 鏡像管理">
+                      <a href="/2023/04/02/docker/3-%E5%AE%B9%E5%99%A8%E7%AE%A1%E7%90%86/" title="Docker 容器管理">
                         <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">Docker 鏡像管理</span>
+                        <span class="hidden-mobile">Docker 容器管理</span>
                         <span class="visible-mobile">上一篇</span>
                       </a>
                     
                   </article>
                   <article class="post-next col-6">
                     
+                    
+                      <a href="/2023/04/01/docker/2-Docker%20%E9%8F%A1%E5%83%8F%E7%AE%A1%E7%90%86/" title="Docker 鏡像管理">
+                        <span class="hidden-mobile">Docker 鏡像管理</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
                     
                   </article>
                 </div>
