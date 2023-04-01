@@ -1,62 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>GitHub 配置公鑰</title>
-    <url>/2023/03/24/GitHub%20%E9%85%8D%E7%BD%AE%E5%85%AC%E9%91%B0%20/</url>
+    <title>Docker 概述</title>
+    <url>/2023/04/01/docker/1-Docker%20%E6%A6%82%E8%BF%B0%20/</url>
     <content><![CDATA[<hr>
 <span id="more"></span>
-<ol>
-<li><p><strong>Settings</strong></p>
-<p> <img src="/./images/git_public_key_setting/Untitled.png" srcset="/img/loading.gif" lazyload alt="Untitled"></p>
+<h1 id="Why"><a href="#Why" class="headerlink" title="Why?"></a>Why?</h1><ul>
+<li><p>上線流程繁瑣</p>
+<p>  開發 → 測試 → 申請資源 → 審批 → 部署 → 測試…等環節</p>
 </li>
-<li><p><strong>SSH and GPC keys</strong></p>
-<p> <img src="/./images/git_public_key_setting/Untitled1.png" srcset="/img/loading.gif" lazyload alt="Untitled"></p>
+<li><p>資源利用率低</p>
+<p>  普遍服務器利用率低,造成過多浪費</p>
 </li>
-<li><p><strong>New SSH key</strong></p>
-<p> <img src="/./images/git_public_key_setting/Untitled2.png" srcset="/img/loading.gif" lazyload alt="Untitled"></p>
+<li><p>擴容&#x2F;縮容不及時</p>
+<p>  業務高峰期擴容流程繁瑣,上線不及時</p>
 </li>
-<li><p>dsfdf</p>
-<p> <img src="/./images/git_public_key_setting/Untitled3.png" srcset="/img/loading.gif" lazyload alt="Untitled"></p>
+<li><p>服務氣環境臃腫</p>
+<p>  服務器臃腫,對後期維護、遷移造成諸多不便</p>
 </li>
-</ol>
+<li><p>環境不一致</p>
+</li>
+</ul>
 <hr>
-<ol>
-<li><p><strong><strong>設置git的user.name和user.email</strong></strong></p>
- <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">git config --global user.name <span class="hljs-string">&quot;xxx&quot;</span><br>git config --global user.email <span class="hljs-string">&quot;xx@xx.com&quot;</span><br></code></pre></td></tr></table></figure>
-</li>
-<li><p><strong><strong>生成ssh key</strong></strong></p>
- <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">ssh-keygen -t rsa<br></code></pre></td></tr></table></figure>
-</li>
-<li><p><strong>查看生成的ssh key，用來複製</strong></p>
- <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">cat</span> ~/.ssh/id_rsa.pub<br></code></pre></td></tr></table></figure></li>
+<h1 id="What"><a href="#What" class="headerlink" title="What?"></a>What?</h1><ul>
+<li>操作系統級的虛擬化技術</li>
+<li>依賴linux特性: Namespace(資源隔離), Cgroups(資源限制)</li>
+<li>簡單的應用程式打包工具</li>
+</ul>
+<hr>
+<h1 id="容器VS虛擬化"><a href="#容器VS虛擬化" class="headerlink" title="容器VS虛擬化"></a>容器VS虛擬化</h1><h3 id="容器"><a href="#容器" class="headerlink" title="容器"></a>容器</h3><ol>
+<li>容器提供一個獨立的環境,實踐環境隔離、資源限制</li>
+<li>主要解決應用層問題,便於快速部署、高效管理</li>
 </ol>
-<div class="note note-light">
-            <p><span class="label label-default">Git</span></p>
-          </div>
+<h3 id="虛擬化"><a href="#虛擬化" class="headerlink" title="虛擬化"></a>虛擬化</h3><ol>
+<li>提供服務器資源利用率</li>
+<li>完全隔離的環境</li>
+</ol>
+<h1 id="安裝Docker"><a href="#安裝Docker" class="headerlink" title="安裝Docker"></a>安裝Docker</h1><figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 添加Docker yum源</span><br>yum-config-manager \<br>--add-repo \<br>https://download.docker.com/linux/centos/docker-ce.repo<br></code></pre></td></tr></table></figure>
 
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-comment">#安裝依賴包</span><br>yum install -y yum-utils<br></code></pre></td></tr></table></figure>
 
-]]></content>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-comment">#安裝DockerCE</span><br>yum install docker-ce docker-ce-cli containerd.io -y<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-comment">#啟動Docker服務並設置開機啟動</span><br>systemctl start docker<br>systemctl <span class="hljs-built_in">enable</span> docker<br></code></pre></td></tr></table></figure>]]></content>
       <categories>
         <category>學習筆記</category>
       </categories>
-  </entry>
-  <entry>
-    <title>Hello World</title>
-    <url>/2023/03/24/hello-world/</url>
-    <content><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<span id="more"></span>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">$ hexo new <span class="hljs-string">&quot;My New Post&quot;</span><br></code></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">$ hexo server<br></code></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">$ hexo generate<br></code></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">$ hexo deploy<br></code></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
-]]></content>
+      <tags>
+        <tag>Docker</tag>
+      </tags>
   </entry>
 </search>
