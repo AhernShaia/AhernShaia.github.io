@@ -17,18 +17,22 @@
   <meta name="keywords" content="AWS">
   
     <meta property="og:type" content="article">
-<meta property="og:title" content="Docker 概述">
-<meta property="og:url" content="http://example.com/2023/04/01/docker/1-Docker%20%E6%A6%82%E8%BF%B0%20/index.html">
+<meta property="og:title" content="Docker 鏡像管理">
+<meta property="og:url" content="http://example.com/2023/04/01/docker/2-Docker%20%E9%8F%A1%E5%83%8F%E7%AE%A1%E7%90%86/index.html">
 <meta property="og:site_name" content="Shaia">
 <meta property="og:locale" content="zh_TW">
-<meta property="article:published_time" content="2023-04-01T14:30:10.972Z">
-<meta property="article:modified_time" content="2023-04-01T14:34:59.362Z">
+<meta property="og:image" content="http://example.com/img/docker/2-%E9%8F%A1%E5%83%8F%E7%AE%A1%E7%90%86/Untitled.png">
+<meta property="og:image" content="http://example.com/img/docker/2-%E9%8F%A1%E5%83%8F%E7%AE%A1%E7%90%86/Untitled%201.png">
+<meta property="og:image" content="http://example.com/img/docker/2-%E9%8F%A1%E5%83%8F%E7%AE%A1%E7%90%86/Untitled%202.png">
+<meta property="article:published_time" content="2023-04-01T15:08:31.874Z">
+<meta property="article:modified_time" content="2023-04-01T15:32:46.997Z">
 <meta property="article:tag" content="Docker">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://example.com/img/docker/2-%E9%8F%A1%E5%83%8F%E7%AE%A1%E7%90%86/Untitled.png">
   
   
   
-  <title>Docker 概述 - Shaia</title>
+  <title>Docker 鏡像管理 - Shaia</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -185,7 +189,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="Docker 概述"></span>
+            <span id="subtitle" data-typed-text="Docker 鏡像管理"></span>
           
         </div>
 
@@ -196,7 +200,7 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2023-04-01 22:30" pubdate>
+        <time datetime="2023-04-01 23:08" pubdate>
           2023年4月1日
         </time>
       </span>
@@ -212,7 +216,7 @@
         
         
         
-          5 分鐘
+          7 分鐘
         
       </span>
     
@@ -250,51 +254,101 @@
         <div id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">Docker 概述</h1>
+            <h1 style="display: none">Docker 鏡像管理</h1>
             
             
               <div class="markdown-body">
                 
                 <hr>
 <span id="more"></span>
-<h1 id="Why"><a href="#Why" class="headerlink" title="Why?"></a>Why?</h1><ul>
-<li><p>上線流程繁瑣</p>
-<p>  開發 → 測試 → 申請資源 → 審批 → 部署 → 測試…等環節</p>
-</li>
-<li><p>資源利用率低</p>
-<p>  普遍服務器利用率低,造成過多浪費</p>
-</li>
-<li><p>擴容&#x2F;縮容不及時</p>
-<p>  業務高峰期擴容流程繁瑣,上線不及時</p>
-</li>
-<li><p>服務氣環境臃腫</p>
-<p>  服務器臃腫,對後期維護、遷移造成諸多不便</p>
-</li>
-<li><p>環境不一致</p>
-</li>
+<h1 id="Docker-鏡像管理"><a href="#Docker-鏡像管理" class="headerlink" title="Docker 鏡像管理"></a>Docker 鏡像管理</h1><h1 id="鏡像"><a href="#鏡像" class="headerlink" title="鏡像"></a>鏡像</h1><ul>
+<li>分層存儲的文件</li>
+<li>軟體應用的環境</li>
+<li>單一鏡像可創建多個容器(相當於模板)</li>
+<li>不需依賴Linux內核而又精簡的Linux操作系統</li>
 </ul>
 <hr>
-<h1 id="What"><a href="#What" class="headerlink" title="What?"></a>What?</h1><ul>
-<li>操作系統級的虛擬化技術</li>
-<li>依賴linux特性: Namespace(資源隔離), Cgroups(資源限制)</li>
-<li>簡單的應用程式打包工具</li>
+<h1 id="鏡像與容器"><a href="#鏡像與容器" class="headerlink" title="鏡像與容器"></a>鏡像與容器</h1><ul>
+<li>鏡像 類似於虛擬機鏡像,一個只<strong>讀</strong>模板</li>
+<li>容器 通過鏡像創建的實例</li>
 </ul>
+<p><img src="/img/docker/2-%E9%8F%A1%E5%83%8F%E7%AE%A1%E7%90%86/Untitled.png" srcset="/img/loading.gif" lazyload alt="Untitled"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment">#查看docker </span><br>docker info<br><br>Server Version: 20.10.9  <span class="hljs-comment">#目前版本</span><br>Storage Driver: overlay2 <span class="hljs-comment">#存儲驅動 (image的存放位置: var/lib/docker/驅動目錄)</span><br></code></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment">#拉取鏡像</span><br>docker pull <span class="hljs-string">&quot;image:tag&quot;</span><br><span class="hljs-comment">#查看鏡像</span><br>docker images<br><span class="hljs-comment">#創建容器,運行</span><br>docker run -d --name <span class="hljs-string">&quot;自定義名稱&quot;</span> <span class="hljs-string">&quot;鏡像名&quot;</span><br><span class="hljs-comment">#查看容器</span><br>docker ps<br></code></pre></td></tr></table></figure>
+
 <hr>
-<h1 id="容器VS虛擬化"><a href="#容器VS虛擬化" class="headerlink" title="容器VS虛擬化"></a>容器VS虛擬化</h1><h3 id="容器"><a href="#容器" class="headerlink" title="容器"></a>容器</h3><ol>
-<li>容器提供一個獨立的環境,實踐環境隔離、資源限制</li>
-<li>主要解決應用層問題,便於快速部署、高效管理</li>
-</ol>
-<h3 id="虛擬化"><a href="#虛擬化" class="headerlink" title="虛擬化"></a>虛擬化</h3><ol>
-<li>提供服務器資源利用率</li>
-<li>完全隔離的環境</li>
-</ol>
-<h1 id="安裝Docker"><a href="#安裝Docker" class="headerlink" title="安裝Docker"></a>安裝Docker</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 添加Docker yum源</span><br>yum-config-manager \<br>--add-repo \<br>https://download.docker.com/linux/centos/docker-ce.repo<br></code></pre></td></tr></table></figure>
+<h1 id="常用命令"><a href="#常用命令" class="headerlink" title="常用命令"></a>常用命令</h1><table>
+<thead>
+<tr>
+<th>docker</th>
+<th>image &lt;命令&gt;</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>命令</td>
+<td>描述</td>
+</tr>
+<tr>
+<td>ls</td>
+<td>列出鏡像</td>
+</tr>
+<tr>
+<td>build</td>
+<td>建構鏡像(Dockerfile)</td>
+</tr>
+<tr>
+<td>history</td>
+<td>查看鏡像歷史</td>
+</tr>
+<tr>
+<td>inspect</td>
+<td>顯示鏡像詳細訊息</td>
+</tr>
+<tr>
+<td>pull</td>
+<td>從鏡像倉庫拉取鏡像</td>
+</tr>
+<tr>
+<td>push</td>
+<td>推送一個鏡像到鏡像倉庫</td>
+</tr>
+<tr>
+<td>rm</td>
+<td>刪除鏡像</td>
+</tr>
+<tr>
+<td>prune</td>
+<td>移除沒有被標記或著沒有被容器引用的鏡像</td>
+</tr>
+<tr>
+<td>tag</td>
+<td>創建一個引用源鏡像,標記鏡像</td>
+</tr>
+<tr>
+<td>export</td>
+<td>導出容器文件系統到tar歸檔文件</td>
+</tr>
+<tr>
+<td>import</td>
+<td>導入容器文件系統tar歸檔文件創建鏡像</td>
+</tr>
+<tr>
+<td>save</td>
+<td>保存一個或多個鏡像到一個tar歸檔文件</td>
+</tr>
+<tr>
+<td>load</td>
+<td>加載鏡像來自tar歸檔或標準輸入</td>
+</tr>
+</tbody></table>
+<h1 id="鏡像存儲-聯合文件系統-UnionFS"><a href="#鏡像存儲-聯合文件系統-UnionFS" class="headerlink" title="鏡像存儲:聯合文件系統(UnionFS)"></a>鏡像存儲:聯合文件系統(UnionFS)</h1><p>相較於虛擬機一個環境裡獨立的鏡像文件,docker則引用聯合文件系統,將多層文件聯合掛載到一個容器文件系統。</p>
+<hr>
+<p><img src="/img/docker/2-%E9%8F%A1%E5%83%8F%E7%AE%A1%E7%90%86/Untitled%201.png" srcset="/img/loading.gif" lazyload alt="Untitled"></p>
+<hr>
+<h1 id="鏡像存儲-寫時複製"><a href="#鏡像存儲-寫時複製" class="headerlink" title="鏡像存儲:寫時複製"></a>鏡像存儲:寫時複製</h1><p>鏡像只供讀取,以共享的形式供多個容器使用,如果需要在容器修改文件(即鏡像裡的文件),docker引用了寫時複製(copy on write),將鏡像裡的文件複製到容器的文件系統進行修改。</p>
+<p><img src="/img/docker/2-%E9%8F%A1%E5%83%8F%E7%AE%A1%E7%90%86/Untitled%202.png" srcset="/img/loading.gif" lazyload alt="Untitled"></p>
 
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment">#安裝依賴包</span><br>yum install -y yum-utils<br></code></pre></td></tr></table></figure>
-
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment">#安裝DockerCE</span><br>yum install docker-ce docker-ce-cli containerd.io -y<br></code></pre></td></tr></table></figure>
-
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment">#啟動Docker服務並設置開機啟動</span><br>systemctl start docker<br>systemctl <span class="hljs-built_in">enable</span> docker<br></code></pre></td></tr></table></figure>
                 
               </div>
             
@@ -341,15 +395,21 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2023/04/01/docker/2-Docker%20%E9%8F%A1%E5%83%8F%E7%AE%A1%E7%90%86/" title="Docker 鏡像管理">
+                      <a href="/2023/04/01/docker/3-%E5%AE%B9%E5%99%A8%E7%AE%A1%E7%90%86/" title="Docker 容器管理">
                         <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">Docker 鏡像管理</span>
+                        <span class="hidden-mobile">Docker 容器管理</span>
                         <span class="visible-mobile">上一篇</span>
                       </a>
                     
                   </article>
                   <article class="post-next col-6">
                     
+                    
+                      <a href="/2023/04/01/docker/1-Docker%20%E6%A6%82%E8%BF%B0%20/" title="Docker 概述">
+                        <span class="hidden-mobile">Docker 概述</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
                     
                   </article>
                 </div>
