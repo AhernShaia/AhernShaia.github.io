@@ -397,62 +397,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Docker 容器網路</title>
-    <url>/2023/04/02/docker/5-%E5%AE%B9%E5%99%A8%E7%B6%B2%E8%B7%AF/</url>
-    <content><![CDATA[<hr>
-<span id="more"></span>
-
-<h2 id="1-網路模式"><a href="#1-網路模式" class="headerlink" title="1.網路模式"></a>1.網路模式</h2><ul>
-<li><p><strong>bridge</strong></p>
-<p>  -net&#x3D;bridge</p>
-<p>  預設模式,Docker啟動後創建一個 docker0網口,新創建的容器預設也是添加在這個網口。</p>
-<p>  也可以自定義網路,相比預設的內部DNS發現,可以通過容器名相互通信。</p>
-</li>
-<li><p><strong>host</strong></p>
-<p>  -net&#x3D;host</p>
-<p>  容器在創建時不會有獨立的network namespace,而是和宿主機共用。配置後,只有網路和宿主機共享,其他都是隔離。</p>
-</li>
-<li><p><strong>none</strong></p>
-<p>  -net&#x3D;none</p>
-<p>  獲取獨立的network namespace,但不為容器進行網路配置,需要手動配置。</p>
-</li>
-<li><p><strong>container</strong></p>
-<p>  -net&#x3D;container:Name&#x2F;ID</p>
-<p>  與指定的容器共用一個network namespace,具有相同網路配置,兩個容器除網路外,其他都是隔離。</p>
-</li>
-</ul>
-<h2 id="2-Docker網路模型"><a href="#2-Docker網路模型" class="headerlink" title="2.Docker網路模型"></a>2.Docker網路模型</h2><p><strong>veth pair</strong>: 成對出現的虛擬網路設備,數據從一端進,一端出,主要用於解決網路命名空間之間的隔離。</p>
-<p><strong>docker0</strong>:bridge是一個二層網路設備,通過bridge可以將Linux支援的不同的端口連接起來,實現類似交換機多對多的通信。</p>
-<p><img src="/img/docker/5-%E5%AE%B9%E5%99%A8%E7%B6%B2%E8%B7%AF/Untitled.png" srcset="/img/loading.gif" lazyload alt="Untitled"></p>
-<h2 id="3-容器網路訪問原理"><a href="#3-容器網路訪問原理" class="headerlink" title="3.容器網路訪問原理"></a>3.容器網路訪問原理</h2><p><img src="/img/docker/5-%E5%AE%B9%E5%99%A8%E7%B6%B2%E8%B7%AF/Untitled%201.png" srcset="/img/loading.gif" lazyload alt="Untitled"></p>
-<h2 id="4-容器網路核心-iptables"><a href="#4-容器網路核心-iptables" class="headerlink" title="4.容器網路核心:iptables"></a>4.容器網路核心:iptables</h2><p><img src="/img/docker/5-%E5%AE%B9%E5%99%A8%E7%B6%B2%E8%B7%AF/Untitled%202.png" srcset="/img/loading.gif" lazyload alt="Untitled"></p>
-<p><img src="/img/docker/5-%E5%AE%B9%E5%99%A8%E7%B6%B2%E8%B7%AF/Untitled%203.png" srcset="/img/loading.gif" lazyload alt="Untitled"></p>
-<p><strong>INPUT鏈</strong>：接收的數據包是本機(入站)時，應用此鏈中的規則。</p>
-<p><strong>OUTPUT鏈</strong>：本機向外發送數據包(出站)時，應用此鏈中的規則。</p>
-<p><strong>FORWARD鏈</strong>：需要通過防火牆中轉發送給其他地址的數據包(轉發)時，應用測<br>鏈中的規則。</p>
-<p><strong>PREROUTING鏈</strong>：在對數據包做路由選擇之前，應用此鏈中的規則。 </p>
-<p><strong>POSTROUTING鏈</strong>：在對數據包做路由選擇之後，應用此鏈中的規則。</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-comment">#外部訪問容器</span><br>iptables -t nat -vnL DOCKER<br><span class="hljs-comment"># 容器訪問外部</span><br>iptables -t nat -vnL POSTROUTING<br></code></pre></td></tr></table></figure>
-
-<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># DNAT 目的地址轉換，修改數據包目標IP。</span><br><span class="hljs-comment"># 外部訪問容器：</span><br>-A DOCKER ! -i docker0 -p tcp -m tcp --dport <span class="hljs-string">&#x27;埠&#x27;</span> -j DNAT --to-destination <span class="hljs-string">&#x27;容器IP&#x27;</span>:80<br><br><span class="hljs-comment"># MASQUERADE 動態源地址轉換</span><br><span class="hljs-comment"># SNAT 修改源IP為宿主機IP向外發出</span><br><span class="hljs-comment"># 數據包源IP來自172.17.0.0/16這個網段都要做源地址轉換</span><br><br><span class="hljs-comment"># 容器訪問外部</span><br>-A POSTROUTING -s 172.17.0.0/16 ! -o docker0 -j MASQUERADE<br></code></pre></td></tr></table></figure>
-
-<h2 id="5-跨主機網路-docker主機容器通信"><a href="#5-跨主機網路-docker主機容器通信" class="headerlink" title="5.跨主機網路: docker主機容器通信"></a>5.跨主機網路: docker主機容器通信</h2><h3 id="Flannel是CoreOS維護的網路組件-在主機上運行daemon-process-負責維護本地的路由轉發-使用etcd儲存網路與容器之間的關係。"><a href="#Flannel是CoreOS維護的網路組件-在主機上運行daemon-process-負責維護本地的路由轉發-使用etcd儲存網路與容器之間的關係。" class="headerlink" title="Flannel是CoreOS維護的網路組件,在主機上運行daemon process,負責維護本地的路由轉發,使用etcd儲存網路與容器之間的關係。"></a>Flannel是CoreOS維護的網路組件,在主機上運行daemon process,負責維護本地的路由轉發,使用<strong>etcd</strong>儲存網路與容器之間的關係。</h3><figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 安裝etcd</span><br>yum install etcd -y<br><br><span class="hljs-comment"># 配置</span><br>vi /etc/etcd/etcd.conf<br><br>ETCD_DATA_DIR=<span class="hljs-string">&quot;/var/lib/etcd/default.etcd&quot;</span><br>ETCD_LISTEN_CLIENT_URLS=<span class="hljs-string">&quot;http://&#x27;宿主機IP&#x27;:2379&quot;</span><br>ETCD_NAME=<span class="hljs-string">&quot;default&quot;</span><br>ETCD_ADVERTISE_CLIENT_URLS=<span class="hljs-string">&quot;http://&#x27;宿主機IP&#x27;:2379&quot;</span><br></code></pre></td></tr></table></figure>
-
-<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 安裝flannel</span><br>yum install flannel -y<br><br><span class="hljs-comment"># 配置</span><br>vi /etc/sysconfig/flanneld<br><br>FLANNEL_ETCD_ENDPOINTS=<span class="hljs-string">&quot;http://&#x27;宿主機IP&#x27;:2379&quot;</span><br>FLANNEL_ETCD_PREFIX=<span class="hljs-string">&quot;/atomic.io/network“</span><br></code></pre></td></tr></table></figure>
-
-<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># etcd添加子網 set:配置 get:獲取</span><br>etcdctl --endpoints=<span class="hljs-string">&quot;http://192.168.31.73:2379&quot;</span> <span class="hljs-built_in">set</span> /atomic.io/network/config <span class="hljs-string">&#x27;&#123; &quot;Network&quot;: </span><br><span class="hljs-string">&quot;172.17.0.0/16&quot;, &quot;Backend&quot;: &#123;&quot;Type&quot;: &quot;vxlan&quot;&#125;&#125; &#x27;</span><br></code></pre></td></tr></table></figure>
-
-<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 配置Docker使用flannel生成網路訊息</span><br>vi /usr/lib/systemd/system/docker.service<br>EnvironmentFile=/run/flannel/docker<br>ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock<br><br><span class="hljs-comment">#驗證</span><br><span class="hljs-built_in">echo</span> <span class="hljs-variable">$DOCKER_NETWORK_OPTIONS</span><br><br></code></pre></td></tr></table></figure>
-
-<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-comment">#啟動服務設定開機啟動</span><br>systemctl daemon-reload<br>systemctl start flanneld<br>systemctl <span class="hljs-built_in">enable</span> flanneld<br></code></pre></td></tr></table></figure>]]></content>
-      <categories>
-        <category>學習筆記</category>
-      </categories>
-      <tags>
-        <tag>Docker</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Harbor</title>
     <url>/2023/04/02/docker/harbor/</url>
     <content><![CDATA[<hr>
@@ -615,6 +559,104 @@
       </tags>
   </entry>
   <entry>
+    <title>Docker 容器網路</title>
+    <url>/2023/04/02/docker/5-%E5%AE%B9%E5%99%A8%E7%B6%B2%E8%B7%AF/</url>
+    <content><![CDATA[<hr>
+<span id="more"></span>
+
+<h2 id="1-網路模式"><a href="#1-網路模式" class="headerlink" title="1.網路模式"></a>1.網路模式</h2><ul>
+<li><p><strong>bridge</strong></p>
+<p>  -net&#x3D;bridge</p>
+<p>  預設模式,Docker啟動後創建一個 docker0網口,新創建的容器預設也是添加在這個網口。</p>
+<p>  也可以自定義網路,相比預設的內部DNS發現,可以通過容器名相互通信。</p>
+</li>
+<li><p><strong>host</strong></p>
+<p>  -net&#x3D;host</p>
+<p>  容器在創建時不會有獨立的network namespace,而是和宿主機共用。配置後,只有網路和宿主機共享,其他都是隔離。</p>
+</li>
+<li><p><strong>none</strong></p>
+<p>  -net&#x3D;none</p>
+<p>  獲取獨立的network namespace,但不為容器進行網路配置,需要手動配置。</p>
+</li>
+<li><p><strong>container</strong></p>
+<p>  -net&#x3D;container:Name&#x2F;ID</p>
+<p>  與指定的容器共用一個network namespace,具有相同網路配置,兩個容器除網路外,其他都是隔離。</p>
+</li>
+</ul>
+<h2 id="2-Docker網路模型"><a href="#2-Docker網路模型" class="headerlink" title="2.Docker網路模型"></a>2.Docker網路模型</h2><p><strong>veth pair</strong>: 成對出現的虛擬網路設備,數據從一端進,一端出,主要用於解決網路命名空間之間的隔離。</p>
+<p><strong>docker0</strong>:bridge是一個二層網路設備,通過bridge可以將Linux支援的不同的端口連接起來,實現類似交換機多對多的通信。</p>
+<p><img src="/img/docker/5-%E5%AE%B9%E5%99%A8%E7%B6%B2%E8%B7%AF/Untitled.png" srcset="/img/loading.gif" lazyload alt="Untitled"></p>
+<h2 id="3-容器網路訪問原理"><a href="#3-容器網路訪問原理" class="headerlink" title="3.容器網路訪問原理"></a>3.容器網路訪問原理</h2><p><img src="/img/docker/5-%E5%AE%B9%E5%99%A8%E7%B6%B2%E8%B7%AF/Untitled%201.png" srcset="/img/loading.gif" lazyload alt="Untitled"></p>
+<h2 id="4-容器網路核心-iptables"><a href="#4-容器網路核心-iptables" class="headerlink" title="4.容器網路核心:iptables"></a>4.容器網路核心:iptables</h2><p><img src="/img/docker/5-%E5%AE%B9%E5%99%A8%E7%B6%B2%E8%B7%AF/Untitled%202.png" srcset="/img/loading.gif" lazyload alt="Untitled"></p>
+<p><img src="/img/docker/5-%E5%AE%B9%E5%99%A8%E7%B6%B2%E8%B7%AF/Untitled%203.png" srcset="/img/loading.gif" lazyload alt="Untitled"></p>
+<p><strong>INPUT鏈</strong>：接收的數據包是本機(入站)時，應用此鏈中的規則。</p>
+<p><strong>OUTPUT鏈</strong>：本機向外發送數據包(出站)時，應用此鏈中的規則。</p>
+<p><strong>FORWARD鏈</strong>：需要通過防火牆中轉發送給其他地址的數據包(轉發)時，應用測<br>鏈中的規則。</p>
+<p><strong>PREROUTING鏈</strong>：在對數據包做路由選擇之前，應用此鏈中的規則。 </p>
+<p><strong>POSTROUTING鏈</strong>：在對數據包做路由選擇之後，應用此鏈中的規則。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-comment">#外部訪問容器</span><br>iptables -t nat -vnL DOCKER<br><span class="hljs-comment"># 容器訪問外部</span><br>iptables -t nat -vnL POSTROUTING<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># DNAT 目的地址轉換，修改數據包目標IP。</span><br><span class="hljs-comment"># 外部訪問容器：</span><br>-A DOCKER ! -i docker0 -p tcp -m tcp --dport <span class="hljs-string">&#x27;埠&#x27;</span> -j DNAT --to-destination <span class="hljs-string">&#x27;容器IP&#x27;</span>:80<br><br><span class="hljs-comment"># MASQUERADE 動態源地址轉換</span><br><span class="hljs-comment"># SNAT 修改源IP為宿主機IP向外發出</span><br><span class="hljs-comment"># 數據包源IP來自172.17.0.0/16這個網段都要做源地址轉換</span><br><br><span class="hljs-comment"># 容器訪問外部</span><br>-A POSTROUTING -s 172.17.0.0/16 ! -o docker0 -j MASQUERADE<br></code></pre></td></tr></table></figure>
+
+<h2 id="5-跨主機網路-docker主機容器通信"><a href="#5-跨主機網路-docker主機容器通信" class="headerlink" title="5.跨主機網路: docker主機容器通信"></a>5.跨主機網路: docker主機容器通信</h2><h3 id="Flannel是CoreOS維護的網路組件-在主機上運行daemon-process-負責維護本地的路由轉發-使用etcd儲存網路與容器之間的關係。"><a href="#Flannel是CoreOS維護的網路組件-在主機上運行daemon-process-負責維護本地的路由轉發-使用etcd儲存網路與容器之間的關係。" class="headerlink" title="Flannel是CoreOS維護的網路組件,在主機上運行daemon process,負責維護本地的路由轉發,使用etcd儲存網路與容器之間的關係。"></a>Flannel是CoreOS維護的網路組件,在主機上運行daemon process,負責維護本地的路由轉發,使用<strong>etcd</strong>儲存網路與容器之間的關係。</h3><figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 安裝etcd</span><br>yum install etcd -y<br><br><span class="hljs-comment"># 配置</span><br>vi /etc/etcd/etcd.conf<br><br>ETCD_DATA_DIR=<span class="hljs-string">&quot;/var/lib/etcd/default.etcd&quot;</span><br>ETCD_LISTEN_CLIENT_URLS=<span class="hljs-string">&quot;http://&#x27;宿主機IP&#x27;:2379&quot;</span><br>ETCD_NAME=<span class="hljs-string">&quot;default&quot;</span><br>ETCD_ADVERTISE_CLIENT_URLS=<span class="hljs-string">&quot;http://&#x27;宿主機IP&#x27;:2379&quot;</span><br></code></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 安裝flannel</span><br>yum install flannel -y<br><br><span class="hljs-comment"># 配置</span><br>vi /etc/sysconfig/flanneld<br><br>FLANNEL_ETCD_ENDPOINTS=<span class="hljs-string">&quot;http://&#x27;宿主機IP&#x27;:2379&quot;</span><br>FLANNEL_ETCD_PREFIX=<span class="hljs-string">&quot;/atomic.io/network“</span><br></code></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># etcd添加子網 set:配置 get:獲取</span><br>etcdctl --endpoints=<span class="hljs-string">&quot;http://192.168.31.73:2379&quot;</span> <span class="hljs-built_in">set</span> /atomic.io/network/config <span class="hljs-string">&#x27;&#123; &quot;Network&quot;: </span><br><span class="hljs-string">&quot;172.17.0.0/16&quot;, &quot;Backend&quot;: &#123;&quot;Type&quot;: &quot;vxlan&quot;&#125;&#125; &#x27;</span><br></code></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 配置Docker使用flannel生成網路訊息</span><br>vi /usr/lib/systemd/system/docker.service<br>EnvironmentFile=/run/flannel/docker<br>ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock<br><br><span class="hljs-comment">#驗證</span><br><span class="hljs-built_in">echo</span> <span class="hljs-variable">$DOCKER_NETWORK_OPTIONS</span><br><br></code></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-comment">#啟動服務設定開機啟動</span><br>systemctl daemon-reload<br>systemctl start flanneld<br>systemctl <span class="hljs-built_in">enable</span> flanneld<br></code></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>學習筆記</category>
+      </categories>
+      <tags>
+        <tag>Docker</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>CI 平台部署</title>
+    <url>/2023/04/02/docker/CI%E5%B9%B3%E5%8F%B0%E9%83%A8%E7%BD%B2/</url>
+    <content><![CDATA[<hr>
+<span id="more"></span>
+
+<p>架構圖:</p>
+<p><img src="/img/docker/CI%E5%B9%B3%E5%8F%B0%E9%83%A8%E7%BD%B2/CICD.jpg" srcset="/img/loading.gif" lazyload alt="CICD.jpg"></p>
+<ol>
+<li>開發人員將code 提交到git庫</li>
+<li>由Jenkins拉取git庫的code進行編譯,編譯成功後,會打包一個新的境像推送到 harbor</li>
+<li>最後部署在product環境</li>
+</ol>
+<h2 id="1-安裝Gitlab"><a href="#1-安裝Gitlab" class="headerlink" title="1.安裝Gitlab"></a>1.安裝Gitlab</h2><figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">docker run -d \<br>--name gitlab \<br>-p 8443:443 \<br>-p 9999:80 \<br>-p 9998:22 \<br>-v <span class="hljs-variable">$PWD</span>/config:/etc/gitlab \<br>-v <span class="hljs-variable">$PWD</span>/logs:/var/log/gitlab \<br>-v <span class="hljs-variable">$PWD</span>/data:/var/opt/gitlab \<br>-v /etc/localtime:/etc/localtime \<br>--restart=always \<br>lizhenliang/gitlab-ce-zh:latest<br></code></pre></td></tr></table></figure>
+
+<h2 id="2-安裝harbor"><a href="#2-安裝harbor" class="headerlink" title="2.安裝harbor"></a>2.安裝harbor</h2><h2 id="3-部署jenkins"><a href="#3-部署jenkins" class="headerlink" title="3.部署jenkins"></a>3.部署jenkins</h2><ul>
+<li><p>準備JDK和Maven環境</p>
+  <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">tar zxvf jdk-8u45-linux-x64.tar.gz<br><span class="hljs-built_in">mv</span> jdk1.8.0_45 /usr/local/jdk<br>tar zxf apache-maven-3.5.0-bin.tar.gz<br><span class="hljs-built_in">mv</span> apache-maven-3.5.0 /usr/local/maven<br></code></pre></td></tr></table></figure>
+<p>  啟動jenkins ,掛載 jdk,maven 依賴源</p>
+  <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">docker run -d --name jenkins -p 80:8080 -p 50000:50000 -u root  \<br>   -v /opt/jenkins_home:/var/jenkins_home \<br>   -v /var/run/docker.sock:/var/run/docker.sock   \<br>   -v /usr/bin/docker:/usr/bin/docker \<br>   -v /usr/local/maven:/usr/local/maven \<br>   -v /usr/local/jdk:/usr/local/jdk \<br>   -v /etc/localtime:/etc/localtime \<br>   --restart=always \<br>   --name jenkins jenkins/jenkins<br></code></pre></td></tr></table></figure>
+<p>  安裝插件</p>
+<p>  管理Jenkins→系统配置→管理插件→搜索git&#x2F;<strong>pipeline</strong>，點選後<strong>安裝</strong></p>
+  <figure class="highlight groovy"><table><tr><td class="code"><pre><code class="hljs groovy"><span class="hljs-meta">#!/usr/bin/env groovy</span><br><br><span class="hljs-keyword">def</span> registry = <span class="hljs-string">&quot;**reg.ahern.com**&quot;</span><br># 專案名<br><span class="hljs-keyword">def</span> project = <span class="hljs-string">&quot;welcome&quot;</span><br><span class="hljs-keyword">def</span> app_name = <span class="hljs-string">&quot;demo&quot;</span><br># 鏡像地址/專案名<br><span class="hljs-keyword">def</span> image_name = <span class="hljs-string">&quot;$&#123;registry&#125;/$&#123;project&#125;/$&#123;app_name&#125;:$&#123;**Branch**&#125;-$&#123;BUILD_NUMBER&#125;&quot;</span><br><span class="hljs-keyword">def</span> git_address = <span class="hljs-string">&quot;**http://192.168.238.131:9999/root/java-demo**&quot;</span><br>#透過添加jenkins的認證訊息生成的憑證<br><span class="hljs-keyword">def</span> docker_registry_auth = <span class="hljs-string">&quot;**fdbd165a-699a-4350-af5c-78494281db15**&quot;</span><br><span class="hljs-keyword">def</span> git_auth = <span class="hljs-string">&quot;**316713bd-bbc5-47a7-8168-c3d99eddeb4c**&quot;</span><br><br>pipeline &#123;<br>    agent any<br>    stages &#123;<br>        stage(<span class="hljs-string">&#x27;拉取代码&#x27;</span>)&#123;<br>            steps &#123;<br>              checkout([<span class="hljs-attr">$class:</span> <span class="hljs-string">&#x27;GitSCM&#x27;</span>, <span class="hljs-attr">branches:</span> [[<span class="hljs-attr">name:</span> <span class="hljs-string">&#x27;$&#123;Branch&#125;&#x27;</span>]], <span class="hljs-attr">userRemoteConfigs:</span> [[<span class="hljs-attr">credentialsId:</span> <span class="hljs-string">&quot;$&#123;git_auth&#125;&quot;</span>, <span class="hljs-attr">url:</span> <span class="hljs-string">&quot;$&#123;git_address&#125;&quot;</span>]]])<br>            &#125;<br>        &#125;<br><br>        stage(<span class="hljs-string">&#x27;代码编译&#x27;</span>)&#123;<br>           steps &#123;<br>             sh <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">                JAVA_HOME=/usr/local/jdk</span><br><span class="hljs-string">                PATH=$JAVA_HOME/bin:/usr/local/maven/bin:$PATH</span><br><span class="hljs-string">                mvn clean package -Dmaven.test.skip=true</span><br><span class="hljs-string">                &quot;&quot;&quot;</span> <br>           &#125;<br>        &#125;<br><br>        stage(<span class="hljs-string">&#x27;构建镜像&#x27;</span>)&#123;<br>           steps &#123;<br>                withCredentials([usernamePassword(<span class="hljs-attr">credentialsId:</span> <span class="hljs-string">&quot;$&#123;docker_registry_auth&#125;&quot;</span>, <span class="hljs-attr">passwordVariable:</span> <span class="hljs-string">&#x27;password&#x27;</span>, <span class="hljs-attr">usernameVariable:</span> <span class="hljs-string">&#x27;username&#x27;</span>)]) &#123;<br>                sh <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">                  echo &#x27;</span><br><span class="hljs-string">                    FROM $&#123;registry&#125;/library/tomcat:v1</span><br><span class="hljs-string">                    LABEL maitainer lizhenliang</span><br><span class="hljs-string">                    RUN rm -rf /usr/local/tomcat/webapps/*</span><br><span class="hljs-string">                    ADD target/*.war /usr/local/tomcat/webapps/ROOT.war</span><br><span class="hljs-string">                  &#x27; &gt; Dockerfile</span><br><span class="hljs-string">                  docker build -t $&#123;image_name&#125; .</span><br><span class="hljs-string">                  docker login -u $&#123;username&#125; -p &#x27;$&#123;password&#125;&#x27; $&#123;registry&#125;</span><br><span class="hljs-string">                  docker push $&#123;image_name&#125;</span><br><span class="hljs-string">                &quot;&quot;&quot;</span><br>                &#125;<br>           &#125; <br>        &#125;<br><br>        stage(<span class="hljs-string">&#x27;部署到Docker&#x27;</span>)&#123;<br>           steps &#123;<br>              sh <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">              docker rm -f tomcat-java-demo |true</span><br><span class="hljs-string">              docker container run -d --name tomcat-java-demo -p 88:8080 $&#123;image_name&#125;</span><br><span class="hljs-string">              &quot;&quot;&quot;</span><br>            &#125;<br>        &#125;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>  將harbor的憑證訊息交由jenkins</p>
+<p>  Jenkins → 管理Jenkins → <strong><a href="http://192.168.238.131/credentials">Manage Credentials</a> → global → 添加harbor 登入訊息</strong></p>
+<p>  <img src="/img/docker/CI%E5%B9%B3%E5%8F%B0%E9%83%A8%E7%BD%B2/Untitled.png" srcset="/img/loading.gif" lazyload alt="Untitled"></p>
+<p>  添加完後生成憑證(ID)</p>
+<p>  <img src="/img/docker/CI%E5%B9%B3%E5%8F%B0%E9%83%A8%E7%BD%B2/Untitled%201.png" srcset="/img/loading.gif" lazyload alt="Untitled"></p>
+  <aside>
+  ‼️ 透過 **Pipeline Syntax** 生成相對應語法
+  
+  </aside></li>
+</ul>
+]]></content>
+      <categories>
+        <category>學習筆記</category>
+      </categories>
+      <tags>
+        <tag>Docker</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>監控系統部署(Prometheus+Grafana監控Docker主機)</title>
     <url>/2023/04/02/docker/%E7%9B%A3%E6%8E%A7%E7%B3%BB%E7%B5%B1%E9%83%A8%E7%BD%B2/</url>
     <content><![CDATA[<hr>
@@ -662,48 +704,6 @@
 <li>prometheus無數據</li>
 </ol>
 </blockquote>
-]]></content>
-      <categories>
-        <category>學習筆記</category>
-      </categories>
-      <tags>
-        <tag>Docker</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>CI 平台部署</title>
-    <url>/2023/04/02/docker/CI%E5%B9%B3%E5%8F%B0%E9%83%A8%E7%BD%B2/</url>
-    <content><![CDATA[<hr>
-<span id="more"></span>
-
-<p>架構圖:</p>
-<p><img src="/img/docker/CI%E5%B9%B3%E5%8F%B0%E9%83%A8%E7%BD%B2/CICD.jpg" srcset="/img/loading.gif" lazyload alt="CICD.jpg"></p>
-<ol>
-<li>開發人員將code 提交到git庫</li>
-<li>由Jenkins拉取git庫的code進行編譯,編譯成功後,會打包一個新的境像推送到 harbor</li>
-<li>最後部署在product環境</li>
-</ol>
-<h2 id="1-安裝Gitlab"><a href="#1-安裝Gitlab" class="headerlink" title="1.安裝Gitlab"></a>1.安裝Gitlab</h2><figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">docker run -d \<br>--name gitlab \<br>-p 8443:443 \<br>-p 9999:80 \<br>-p 9998:22 \<br>-v <span class="hljs-variable">$PWD</span>/config:/etc/gitlab \<br>-v <span class="hljs-variable">$PWD</span>/logs:/var/log/gitlab \<br>-v <span class="hljs-variable">$PWD</span>/data:/var/opt/gitlab \<br>-v /etc/localtime:/etc/localtime \<br>--restart=always \<br>lizhenliang/gitlab-ce-zh:latest<br></code></pre></td></tr></table></figure>
-
-<h2 id="2-安裝harbor"><a href="#2-安裝harbor" class="headerlink" title="2.安裝harbor"></a>2.安裝harbor</h2><h2 id="3-部署jenkins"><a href="#3-部署jenkins" class="headerlink" title="3.部署jenkins"></a>3.部署jenkins</h2><ul>
-<li><p>準備JDK和Maven環境</p>
-  <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">tar zxvf jdk-8u45-linux-x64.tar.gz<br><span class="hljs-built_in">mv</span> jdk1.8.0_45 /usr/local/jdk<br>tar zxf apache-maven-3.5.0-bin.tar.gz<br><span class="hljs-built_in">mv</span> apache-maven-3.5.0 /usr/local/maven<br></code></pre></td></tr></table></figure>
-<p>  啟動jenkins ,掛載 jdk,maven 依賴源</p>
-  <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">docker run -d --name jenkins -p 80:8080 -p 50000:50000 -u root  \<br>   -v /opt/jenkins_home:/var/jenkins_home \<br>   -v /var/run/docker.sock:/var/run/docker.sock   \<br>   -v /usr/bin/docker:/usr/bin/docker \<br>   -v /usr/local/maven:/usr/local/maven \<br>   -v /usr/local/jdk:/usr/local/jdk \<br>   -v /etc/localtime:/etc/localtime \<br>   --restart=always \<br>   --name jenkins jenkins/jenkins<br></code></pre></td></tr></table></figure>
-<p>  安裝插件</p>
-<p>  管理Jenkins→系统配置→管理插件→搜索git&#x2F;<strong>pipeline</strong>，點選後<strong>安裝</strong></p>
-  <figure class="highlight groovy"><table><tr><td class="code"><pre><code class="hljs groovy"><span class="hljs-meta">#!/usr/bin/env groovy</span><br><br><span class="hljs-keyword">def</span> registry = <span class="hljs-string">&quot;**reg.ahern.com**&quot;</span><br># 專案名<br><span class="hljs-keyword">def</span> project = <span class="hljs-string">&quot;welcome&quot;</span><br><span class="hljs-keyword">def</span> app_name = <span class="hljs-string">&quot;demo&quot;</span><br># 鏡像地址/專案名<br><span class="hljs-keyword">def</span> image_name = <span class="hljs-string">&quot;$&#123;registry&#125;/$&#123;project&#125;/$&#123;app_name&#125;:$&#123;**Branch**&#125;-$&#123;BUILD_NUMBER&#125;&quot;</span><br><span class="hljs-keyword">def</span> git_address = <span class="hljs-string">&quot;**http://192.168.238.131:9999/root/java-demo**&quot;</span><br>#透過添加jenkins的認證訊息生成的憑證<br><span class="hljs-keyword">def</span> docker_registry_auth = <span class="hljs-string">&quot;**fdbd165a-699a-4350-af5c-78494281db15**&quot;</span><br><span class="hljs-keyword">def</span> git_auth = <span class="hljs-string">&quot;**316713bd-bbc5-47a7-8168-c3d99eddeb4c**&quot;</span><br><br>pipeline &#123;<br>    agent any<br>    stages &#123;<br>        stage(<span class="hljs-string">&#x27;拉取代码&#x27;</span>)&#123;<br>            steps &#123;<br>              checkout([<span class="hljs-attr">$class:</span> <span class="hljs-string">&#x27;GitSCM&#x27;</span>, <span class="hljs-attr">branches:</span> [[<span class="hljs-attr">name:</span> <span class="hljs-string">&#x27;$&#123;Branch&#125;&#x27;</span>]], <span class="hljs-attr">userRemoteConfigs:</span> [[<span class="hljs-attr">credentialsId:</span> <span class="hljs-string">&quot;$&#123;git_auth&#125;&quot;</span>, <span class="hljs-attr">url:</span> <span class="hljs-string">&quot;$&#123;git_address&#125;&quot;</span>]]])<br>            &#125;<br>        &#125;<br><br>        stage(<span class="hljs-string">&#x27;代码编译&#x27;</span>)&#123;<br>           steps &#123;<br>             sh <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">                JAVA_HOME=/usr/local/jdk</span><br><span class="hljs-string">                PATH=$JAVA_HOME/bin:/usr/local/maven/bin:$PATH</span><br><span class="hljs-string">                mvn clean package -Dmaven.test.skip=true</span><br><span class="hljs-string">                &quot;&quot;&quot;</span> <br>           &#125;<br>        &#125;<br><br>        stage(<span class="hljs-string">&#x27;构建镜像&#x27;</span>)&#123;<br>           steps &#123;<br>                withCredentials([usernamePassword(<span class="hljs-attr">credentialsId:</span> <span class="hljs-string">&quot;$&#123;docker_registry_auth&#125;&quot;</span>, <span class="hljs-attr">passwordVariable:</span> <span class="hljs-string">&#x27;password&#x27;</span>, <span class="hljs-attr">usernameVariable:</span> <span class="hljs-string">&#x27;username&#x27;</span>)]) &#123;<br>                sh <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">                  echo &#x27;</span><br><span class="hljs-string">                    FROM $&#123;registry&#125;/library/tomcat:v1</span><br><span class="hljs-string">                    LABEL maitainer lizhenliang</span><br><span class="hljs-string">                    RUN rm -rf /usr/local/tomcat/webapps/*</span><br><span class="hljs-string">                    ADD target/*.war /usr/local/tomcat/webapps/ROOT.war</span><br><span class="hljs-string">                  &#x27; &gt; Dockerfile</span><br><span class="hljs-string">                  docker build -t $&#123;image_name&#125; .</span><br><span class="hljs-string">                  docker login -u $&#123;username&#125; -p &#x27;$&#123;password&#125;&#x27; $&#123;registry&#125;</span><br><span class="hljs-string">                  docker push $&#123;image_name&#125;</span><br><span class="hljs-string">                &quot;&quot;&quot;</span><br>                &#125;<br>           &#125; <br>        &#125;<br><br>        stage(<span class="hljs-string">&#x27;部署到Docker&#x27;</span>)&#123;<br>           steps &#123;<br>              sh <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">              docker rm -f tomcat-java-demo |true</span><br><span class="hljs-string">              docker container run -d --name tomcat-java-demo -p 88:8080 $&#123;image_name&#125;</span><br><span class="hljs-string">              &quot;&quot;&quot;</span><br>            &#125;<br>        &#125;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
-
-<p>  將harbor的憑證訊息交由jenkins</p>
-<p>  Jenkins → 管理Jenkins → <strong><a href="http://192.168.238.131/credentials">Manage Credentials</a> → global → 添加harbor 登入訊息</strong></p>
-<p>  <img src="/img/docker/CI%E5%B9%B3%E5%8F%B0%E9%83%A8%E7%BD%B2/Untitled.png" srcset="/img/loading.gif" lazyload alt="Untitled"></p>
-<p>  添加完後生成憑證(ID)</p>
-<p>  <img src="/img/docker/CI%E5%B9%B3%E5%8F%B0%E9%83%A8%E7%BD%B2/Untitled%201.png" srcset="/img/loading.gif" lazyload alt="Untitled"></p>
-  <aside>
-  ‼️ 透過 **Pipeline Syntax** 生成相對應語法
-  
-  </aside></li>
-</ul>
 ]]></content>
       <categories>
         <category>學習筆記</category>
