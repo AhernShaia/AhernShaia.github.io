@@ -106,13 +106,6 @@
 <h1 id="1對多：has-many"><a href="#1對多：has-many" class="headerlink" title="1對多：has_many"></a>1對多：has_many</h1><p>建立一對多的關係，例如：一台購物車有多個商品。</p>
 <h3 id="再建立一個Model"><a href="#再建立一個Model" class="headerlink" title="再建立一個Model"></a>再建立一個Model</h3><p>承接上面的示例：</p>
 <aside>
-🚧
-
-<figure class="highlight ruby"><table><tr><td class="code"><pre><code class="hljs ruby"><span class="hljs-comment"># Product</span><br>rails g model <span class="hljs-title class_">Product</span> name <span class="hljs-symbol">price:</span>integer<br></code></pre></td></tr></table></figure>
-
-</aside>
-
-<aside>
 🚧 Product：
 
 <figure class="highlight ruby"><table><tr><td class="code"><pre><code class="hljs ruby">rails g model <span class="hljs-title class_">Product</span> name <span class="hljs-symbol">price:</span>integer<br></code></pre></td></tr></table></figure>
